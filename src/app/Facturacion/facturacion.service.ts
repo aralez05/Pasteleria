@@ -57,7 +57,7 @@ export class FacturacionService {
 
   private http = inject(HttpClient);
 
-  private readonly API_URL = 'https://bakcend-5pyr.onrender.com/api/usuarios';
+  private readonly API_URL = 'https://bakcend-5pyr.onrender.com/api';
 
   // =========================================================================
   // ESTADO REACTIVO (SIGNALS)
