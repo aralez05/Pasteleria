@@ -1869,7 +1869,7 @@ export class DisenaElTuyo implements AfterViewInit, OnDestroy {
       formData.append('configuracion', JSON.stringify(configuracionPastel));
 
       // 5. Enviar el FormData a tu backend
-      this.http.post('  https://tu-api.com/api/guardar-diseno', formData).subscribe({
+     this.http.post('https://bakcend-5pyr.onrender.com/api/guardar-diseno', formData).subscribe({
         next: (respuesta: any) => {
           this.toastMensaje.set('¡Diseño y foto guardados con éxito!');
           this.modalFotoCapturada.set(null); // Cerrar el modal tras guardar
