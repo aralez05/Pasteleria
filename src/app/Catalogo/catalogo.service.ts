@@ -30,7 +30,7 @@ export class CatalogoService {
   private facturacionService = inject(FacturacionService);
 
   // URL del backend Express conectado a MySQL
-  private readonly API_URL = 'http://localhost:3000/api/productos';
+  private readonly API_URL = 'https://bakcend-5pyr.onrender.com/api/productos';
 
   /** Señal reactiva cargada directamente desde la base de datos */
   readonly productos = signal<Producto[]>([]);
