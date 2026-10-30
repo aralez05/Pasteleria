@@ -14,7 +14,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 
 
-import { Cliente as PedidosCliente } from './Pedidos/cliente/cliente';
+import { Clientes as PedidosCliente } from './Pedidos/cliente/cliente';
 import { Trabajador as PedidosTrabajador } from './Pedidos/trabajador/trabajador';
 import { Admin as PedidosAdmin } from './Pedidos/admin/admin';
 
