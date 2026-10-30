@@ -117,28 +117,9 @@ Funciones que se incorporan según las necesidades de cada cliente:
 
 ---
 
-## Paquetes
-
-| Paquete | Para quién | Incluye | Precio |
-|---|---|---|---|
-| **Básico** | Una sucursal | Sistema, instalación y capacitación | *A definir* |
-| **Cadena** | Varias sucursales | Todo lo anterior, personalización de marca y soporte | *A definir* |
-| **A la medida** | Necesidades especiales | Desarrollo de funciones específicas | *Cotización* |
-
----
-
-## Contacto
-
-¿Quieres verlo funcionando con tu catálogo? Agenda una demostración:
-
-- 📧 **Correo:** *[tu correo de contacto]*
-- 📱 **WhatsApp:** *[tu número]*
-- 🌐 **Sitio web:** *[tu sitio]*
-
----
 
 ## Licencia
 
 Software propietario. Todos los derechos reservados. Queda prohibida su copia, distribución o uso comercial sin autorización por escrito.
 
-© 2026 *[Tu nombre o empresa]*
+© 2026 *Yuriel--Pablo*
