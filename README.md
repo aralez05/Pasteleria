@@ -1,63 +1,144 @@
-<<<<<<< HEAD
-# Pasteleria
+# 🧁 Olenka Y Ezis · Sistema Integral para Pastelerías
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.2.
+**Todo tu negocio de repostería en una sola plataforma:** catálogo en línea, pedidos, inventario por sucursal y control de tu equipo, desde el celular o la computadora.
 
-## Development server
+Pensado para pastelerías y panaderías con una o varias sucursales que quieren dejar atrás las libretas, los mensajes sueltos y los inventarios en hojas de cálculo.
 
-To start a local development server, run:
+---
 
-```bash
-ng serve
-```
+## ¿Qué problema resuelve?
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+| Antes | Con el sistema |
+|---|---|
+| Pedidos por WhatsApp, llamada o papel | Cada pedido queda registrado con su folio, cliente, sucursal y estado |
+| No sabes qué hay en el mostrador hasta contarlo | Inventario actualizado al instante, con avisos de productos por agotarse |
+| El cliente pregunta "¿ya está mi pastel?" | El cliente ve el estado de su pedido sin llamar |
+| Cada sucursal lleva su propio control | Una sola vista consolidada de toda la cadena |
+| Cualquiera puede mover precios o inventario | Cada persona ve y hace solo lo que le corresponde a su puesto |
 
-## Code scaffolding
+---
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Características principales
 
-```bash
-ng generate component component-name
-```
+### 🛍️ Para tus clientes
+- Catálogo visual con fotos, sabores, porciones y precios.
+- Búsqueda por nombre, sabor o ingrediente, y filtros por categoría.
+- Disponibilidad a la vista: *disponible*, *últimas piezas* o *agotado*.
+- Selección de productos y confirmación del pedido en pocos pasos.
+- Elección de sucursal, **recoger en tienda o entrega a domicilio**, forma de pago y dedicatoria para el pastel.
+- Seguimiento de cada pedido: *Pendiente → En horno → Decorando → Listo → Entregado*.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### 👩‍🍳 Para tu personal de mostrador y taller
+- Panel de inventario con indicadores: variedades, piezas en stock, productos por agotarse y agotados.
+- Ajuste de existencias en un toque (+1, −1, +5, −5) o con cantidad exacta.
+- Lista de pedidos de su sucursal, con búsqueda y filtros por estado.
+- Avance de cada pedido por las etapas del taller.
+- Alta de personal con **aprobación del administrador**: nadie entra sin tu autorización.
 
-```bash
-ng generate --help
-```
+### 📊 Para la administración
+- Control total del catálogo: agregar productos, cambiar precios y retirar los que ya no se venden.
+- Vista consolidada de **todas las sucursales** con pedidos, ventas e indicadores de producción.
+- Desglose por tienda con un clic para analizar cada sucursal por separado.
+- Búsqueda por folio, cliente, sucursal o producto.
+- Cambio de estado y cancelación de pedidos con reintegro automático al inventario.
 
-## Building
+### ⚙️ Automatizaciones incluidas
+- El inventario se descuenta al registrar un pedido y se repone si se cancela.
+- Los precios y totales los calcula el sistema, así que el cliente no puede alterarlos.
+- Los pedidos nuevos aparecen en el panel del personal y de administración sin recargar la página.
+- Aviso por correo al administrador cuando alguien solicita acceso como personal.
+- Módulo de facturación y tickets de mostrador.
 
-To build the project run:
+---
 
-```bash
-ng build
-```
+## Pensado por roles
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+| | Cliente | Personal | Administrador |
+|---|:--:|:--:|:--:|
+| Ver catálogo y hacer pedidos | ✔ | | |
+| Seguir sus pedidos | ✔ | | |
+| Ver y avanzar pedidos de su sucursal | | ✔ | ✔ |
+| Ajustar inventario | | ✔ | ✔ |
+| Cambiar precios, altas y bajas de productos | | | ✔ |
+| Ver todas las sucursales y sus ventas | | | ✔ |
+| Aprobar a nuevo personal | | | ✔ |
 
-## Running unit tests
+---
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Multi-sucursal desde el primer día
 
-```bash
-ng test
-```
+Cada pedido se asigna a la sucursal que lo prepara. El personal trabaja con los pedidos de su tienda y la administración ve la cadena completa, con indicadores por sucursal. Agregar una sucursal nueva no requiere cambiar el sistema.
 
-## Running end-to-end tests
+---
 
-For end-to-end (e2e) testing, run:
+## Tecnología
 
-```bash
-ng e2e
-```
+| | |
+|---|---|
+| **Interfaz** | Angular, diseño adaptable a celular, tableta y computadora |
+| **Servidor** | Node.js y Express |
+| **Base de datos** | MySQL, compatible con servicios administrados en la nube |
+| **Correo** | Notificaciones por correo electrónico |
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Arquitectura sencilla de mantener: interfaz, servidor y base de datos independientes, lo que permite crecer o cambiar cada parte sin rehacer las demás.
 
-## Additional Resources
+---
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-=======
-# Pasteleria
->>>>>>> 04d824bd6ab8cc15c1b54e6be1730c7c261e0cf4
+## Personalización
+
+El sistema se adapta a la identidad de tu negocio:
+- Nombre, logotipo, colores y tipografías.
+- Catálogo, categorías, etiquetas ("Más vendido", "Tradicional", "Nuevo") y porciones.
+- Sucursales, tarifas de envío y formas de pago.
+- Textos y mensajes para tus clientes.
+
+---
+
+## Implementación
+
+Incluye según el paquete que elijas:
+1. Instalación y configuración en tu servidor o nube.
+2. Carga inicial de tu catálogo y sucursales.
+3. Alta de tu equipo y capacitación para cada rol.
+4. Acompañamiento durante las primeras semanas.
+
+**Requisitos:** un servicio de alojamiento con Node.js y una base de datos MySQL. Nosotros te ayudamos a elegirlos.
+
+---
+
+## Hoja de ruta
+
+Funciones que se incorporan según las necesidades de cada cliente:
+- Cobro en línea con tarjeta.
+- Timbrado de facturas CFDI con un proveedor de certificación autorizado.
+- Avisos al cliente por correo o WhatsApp cuando cambie el estado de su pedido.
+- Reportes de ventas por periodo, producto y sucursal.
+- Aplicación móvil.
+
+---
+
+## Paquetes
+
+| Paquete | Para quién | Incluye | Precio |
+|---|---|---|---|
+| **Básico** | Una sucursal | Sistema, instalación y capacitación | *A definir* |
+| **Cadena** | Varias sucursales | Todo lo anterior, personalización de marca y soporte | *A definir* |
+| **A la medida** | Necesidades especiales | Desarrollo de funciones específicas | *Cotización* |
+
+---
+
+## Contacto
+
+¿Quieres verlo funcionando con tu catálogo? Agenda una demostración:
+
+- 📧 **Correo:** *[tu correo de contacto]*
+- 📱 **WhatsApp:** *[tu número]*
+- 🌐 **Sitio web:** *[tu sitio]*
+
+---
+
+## Licencia
+
+Software propietario. Todos los derechos reservados. Queda prohibida su copia, distribución o uso comercial sin autorización por escrito.
+
+© 2026 *[Tu nombre o empresa]*
