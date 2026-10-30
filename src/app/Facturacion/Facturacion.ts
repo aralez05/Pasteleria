@@ -13,6 +13,6 @@ import { Trabajador } from './trabajador/trabajador';
     selector: 'app-facturacion',
     standalone: true,
     imports: [CommonModule, HasRoleDirective, Admin, Cliente, Trabajador],
-    templateUrl: './facturacion.html'
+    templateUrl: './Facturacion.html'
 })
 export class FacturacionComponent { } 
