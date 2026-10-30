@@ -10,6 +10,6 @@ import { Trabajador } from './trabajador/trabajador';
     selector: 'app-pedidos',
     standalone: true,
     imports: [HasRoleDirective, Admin, Clientes, Trabajador],
-    templateUrl: './pedidos.html'
+    templateUrl: './Pedidos.html'
 })
 export class Pedidos { }
