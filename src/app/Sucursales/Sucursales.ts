@@ -10,6 +10,6 @@ import { TrabajadorSucur } from './TrabajadorSucur/trabajador-sucur';
     selector: 'app-sucursales',
     standalone: true,
     imports: [HasRoleDirective, AdminSucur, ClienteSucur, TrabajadorSucur],
-    templateUrl: './sucursales.html'
+    templateUrl: './Sucursales.html'
 })
 export class Sucursales { }
