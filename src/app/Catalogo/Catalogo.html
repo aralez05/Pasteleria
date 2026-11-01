@@ -1,10 +1,9 @@
 <div class="contenedor-vistas-catalogo">
-    <!-- Muestra la vista de la carpeta 'admin' solo si el rol es admin -->
+
     <app-admin *hasRole="'admin'"></app-admin>
 
-    <!-- Muestra la vista de la carpeta 'trabajadores' si el rol es trabajador -->
     <app-trabajadores *hasRole="'trabajador'"></app-trabajadores>
 
-    <!-- Muestra la vista de la carpeta 'clientes' si el rol es cliente o visitante -->
-    <app-clientes *hasRole="'cliente'"></app-clientes>
+
+    <app-clientes *hasRole="['cliente', 'visitante']"></app-clientes>
 </div>

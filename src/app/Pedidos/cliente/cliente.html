@@ -1,197 +1,110 @@
-<div class="catalogo-wrapper">
-  <div class="catalogo-container">
-    <!-- Encabezado del Catálogo para Clientes -->
-    <header class="catalogo-header">
-      <span class="handwritten-tag">Del horno a tu mesa</span>
-      <h1 class="catalogo-title">Nuestro Catálogo Tradicional</h1>
-      <p class="catalogo-subtitle">
-        Selecciona tus pasteles de autor y panes tradicionales favoritos. Todos nuestros productos se hornean
-        a diario con mantequilla pura e ingredientes mexicanos de la más alta calidad.
+<div class="pedidos-wrapper">
+  <div class="pedidos-container">
+    <!-- Encabezado Cliente -->
+    <header class="pedidos-header">
+      <div class="user-greeting-chip">
+        <span class="material-symbols-outlined">shopping_bag</span>
+        <span>Mis Pedidos Dulces</span>
+      </div>
+      <h1 class="pedidos-title">Seguimiento de Mis Pedidos</h1>
+      <p class="pedidos-subtitle">
+        Consulta el estado de preparación de tus pasteles y postres horneados en <strong>Olenka Y Ezis</strong>.
+        Te notificaremos cada vez que tu pedido pase de nuestro horno a la mesa de decoración.
       </p>
 
-      <!-- Barra de Filtros y Búsqueda -->
-      <div class="filter-controls">
-        <div class="search-box">
-          <span class="material-symbols-outlined search-icon">search</span>
-          <input type="text" placeholder="Buscar por nombre, sabor o ingrediente..." [ngModel]="busqueda()"
-            (ngModelChange)="busqueda.set($event)" class="search-input" />
-          @if (busqueda()) {
-          <button class="clear-search-btn" (click)="busqueda.set('')" title="Limpiar búsqueda">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-          }
+      <!-- Resumen Métricas de Cliente -->
+      <div class="client-stats-row">
+        <div class="stat-bubble active-bubble">
+          <div class="stat-number">{{ pedidosActivosCount() }}</div>
+          <div class="stat-label">Pedidos en Proceso</div>
         </div>
-
-        <div class="category-pills">
-          @for (cat of catalogoService.categorias(); track cat) {
-          <button type="button" class="cat-pill" [class.active]="categoriaFiltro() === cat"
-            (click)="categoriaFiltro.set(cat)">
-            {{ cat }}
-          </button>
-          }
+        <div class="stat-bubble delivered-bubble">
+          <div class="stat-number">{{ pedidosEntregadosCount() }}</div>
+          <div class="stat-label">Pedidos Entregados</div>
+        </div>
+        <div class="stat-action-bubble">
+          <a routerLink="/catalogo" class="btn-new-order">
+            <span class="material-symbols-outlined">add_circle</span>
+            <span>Hacer Nuevo Pedido</span>
+          </a>
         </div>
       </div>
     </header>
 
-    <!-- Grid de Productos (Modo Cliente) -->
-    <section class="products-grid-section">
-      @if (productosFiltrados().length === 0) {
-      <div class="empty-state">
-        <span class="material-symbols-outlined empty-icon">cookie</span>
-        <h3>No encontramos productos que coincidan</h3>
-        <p>Prueba buscando con otro término o selecciona otra categoría.</p>
-        <button class="btn-sweet-secondary" (click)="busqueda.set(''); categoriaFiltro.set('Todos')">
-          Ver todos los productos
-        </button>
-      </div>
-      } @else {
-      <div class="products-grid">
-        @for (prod of productosFiltrados(); track prod.id) {
-        <article class="product-card" [class.out-of-stock]="prod.stock === 0">
-          @if (prod.badge) {
-          <div class="product-badge">{{ prod.badge }}</div>
-          }
-
-          <div class="product-img-wrap">
-            <img [src]="prod.imagen" [alt]="prod.nombre" loading="lazy" />
-            @if (prod.stock === 0) {
-            <div class="sold-out-overlay">
-              <span>Agotado por hoy</span>
-            </div>
-            }
-          </div>
-
-          <div class="product-body">
-            <div class="product-category-row">
-              <span class="product-category">{{ prod.categoria }}</span>
-              <span class="product-portions">{{ prod.porciones || 'Porción individual' }}</span>
-            </div>
-
-            <h3 class="product-title">{{ prod.nombre }}</h3>
-            <p class="product-flavor">{{ prod.sabor }}</p>
-            <p class="product-desc">{{ prod.descripcion }}</p>
-
-            <div class="stock-status-row">
-              @if (prod.stock > 10) {
-              <span class="stock-indicator green">
-                <span class="dot"></span> Disponible: {{ prod.stock }} piezas
-              </span>
-              } @else if (prod.stock > 0) {
-              <span class="stock-indicator yellow">
-                <span class="dot"></span> ¡Últimas {{ prod.stock }} piezas disponibles!
-              </span>
-              } @else {
-              <span class="stock-indicator red">
-                <span class="dot"></span> Agotado en mostrador
-              </span>
-              }
-            </div>
-
-            <div class="product-footer">
-              <div class="price-box">
-                <span class="currency">$</span>
-                <span class="price">{{ prod.precio }}</span>
-                <span class="unit">MXN</span>
-              </div>
-
-              <div class="selection-controls">
-                @if (obtenerCantidad(prod.id) > 0) {
-                <div class="qty-stepper">
-                  <button type="button" class="qty-btn" (click)="decrementar(prod.id)" title="Restar una pieza">
-                    <span class="material-symbols-outlined">remove</span>
-                  </button>
-                  <span class="qty-number">{{ obtenerCantidad(prod.id) }}</span>
-                  <button type="button" class="qty-btn" [disabled]="obtenerCantidad(prod.id) >= prod.stock"
-                    (click)="incrementar(prod.id)" title="Sumar una pieza">
-                    <span class="material-symbols-outlined">add</span>
-                  </button>
-                </div>
-                } @else {
-                <button type="button" class="btn-select-product" [disabled]="prod.stock <= 0"
-                  (click)="seleccionarProducto(prod)">
-                  <span class="material-symbols-outlined">add_shopping_cart</span>
-                  <span>{{ prod.stock > 0 ? 'Seleccionar' : 'Agotado' }}</span>
-                </button>
-                }
-              </div>
-            </div>
-          </div>
-        </article>
-        }
-      </div>
-      }
-    </section>
-  </div>
-
-  <!-- Barra Flotante de Selección (Carrito de Cliente) -->
-  @if (catalogoService.totalPiezasSeleccionadas() > 0) {
-  <aside class="floating-selection-bar">
-    <div class="floating-bar-container">
-      <div class="selection-summary-info">
-        <div class="selection-icon-wrap">
-          <span class="material-symbols-outlined">shopping_basket</span>
-          <span class="selection-count-badge">{{ catalogoService.totalPiezasSeleccionadas() }}</span>
-        </div>
-        <div class="selection-text">
-          <strong>{{ catalogoService.totalPiezasSeleccionadas() }} producto(s) seleccionados</strong>
-          <span class="selection-total-amount">Total: ${{ catalogoService.totalMontoSeleccionado() }} MXN</span>
-        </div>
-      </div>
-
-      <div class="selection-actions">
-        <button type="button" class="btn-view-selection" (click)="abrirResumen()">
-          <span>Ver mi selección</span>
-          <span class="material-symbols-outlined">arrow_forward</span>
-        </button>
-      </div>
+    <!-- Mensaje de pedido registrado -->
+    @if (exitoPedido()) {
+    <div class="checkout-alert success" role="status">
+      <span class="material-symbols-outlined">check_circle</span>
+      <span>{{ exitoPedido() }}</span>
+      <button type="button" class="alert-close" (click)="cerrarExito()" aria-label="Cerrar">
+        <span class="material-symbols-outlined">close</span>
+      </button>
     </div>
-  </aside>
-  }
+    }
 
-  <!-- Modal de Resumen y Confirmación del Pedido -->
-  @if (modalResumenAbierto()) {
-  <div class="modal-backdrop" (click)="cerrarResumen()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
-      <header class="modal-header">
-        <div class="modal-title-box">
-          <span class="material-symbols-outlined icon">receipt_long</span>
-          <h3>Tu Selección de Panadería</h3>
+    <!-- ==================================================================
+         FINALIZAR PEDIDO: aparece cuando hay productos seleccionados
+         ================================================================== -->
+    @if (productosEnSeleccion().length > 0) {
+    <section class="checkout-section">
+      <div class="checkout-heading">
+        <span class="material-symbols-outlined">receipt_long</span>
+        <h2>Finaliza tu pedido</h2>
+      </div>
+
+      <div class="checkout-grid">
+        <!-- Columna izquierda: productos elegidos -->
+        <div class="checkout-panel">
+          <h3 class="checkout-panel-title">1. Tus productos</h3>
+
+          <ul class="checkout-items">
+            @for (item of productosEnSeleccion(); track item.producto.id) {
+            <li class="checkout-item">
+              <img [src]="item.producto.imagen" [alt]="item.producto.nombre" class="checkout-thumb" />
+              <div class="checkout-item-info">
+                <strong>{{ item.producto.nombre }}</strong>
+                <span class="checkout-item-flavor">{{ item.producto.sabor }}</span>
+                <span class="checkout-item-unit">${{ item.producto.precio }} c/u</span>
+              </div>
+
+              <div class="checkout-stepper">
+                <button type="button" (click)="decrementar(item.producto.id)" aria-label="Quitar una pieza">
+                  <span class="material-symbols-outlined">remove</span>
+                </button>
+                <span>{{ item.cantidad }}</span>
+                <button type="button" [disabled]="item.cantidad >= item.producto.stock"
+                  (click)="incrementar(item.producto.id)" aria-label="Agregar una pieza">
+                  <span class="material-symbols-outlined">add</span>
+                </button>
+              </div>
+
+              <span class="checkout-item-total">${{ item.subtotal }}</span>
+
+              <button type="button" class="checkout-remove" (click)="quitarProducto(item.producto.id)"
+                title="Quitar del pedido" aria-label="Quitar del pedido">
+                <span class="material-symbols-outlined">delete_outline</span>
+              </button>
+            </li>
+            }
+          </ul>
+
+          <div class="checkout-links">
+            <a routerLink="/catalogo" class="link-soft">
+              <span class="material-symbols-outlined">add</span> Agregar más productos
+            </a>
+            <button type="button" class="link-soft danger" (click)="vaciarSeleccion()">
+              <span class="material-symbols-outlined">delete_outline</span> Vaciar selección
+            </button>
+          </div>
         </div>
-        <button type="button" class="btn-close-modal" (click)="cerrarResumen()">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </header>
 
-      <div class="modal-body">
-        <ul class="selected-items-list">
-          @for (item of productosEnSeleccion(); track item.producto.id) {
-          <li class="selected-item">
-            <img [src]="item.producto.imagen" [alt]="item.producto.nombre" class="item-thumb" />
-            <div class="item-info">
-              <strong>{{ item.producto.nombre }}</strong>
-              <span class="item-flavor">{{ item.producto.sabor }}</span>
-              <span class="item-price-unit">${{ item.producto.precio }} c/u</span>
-            </div>
-            <div class="item-stepper">
-              <button type="button" class="mini-btn" (click)="decrementar(item.producto.id)">
-                <span class="material-symbols-outlined">remove</span>
-              </button>
-              <span class="item-qty">{{ item.cantidad }}</span>
-              <button type="button" class="mini-btn" [disabled]="item.cantidad >= item.producto.stock"
-                (click)="incrementar(item.producto.id)">
-                <span class="material-symbols-outlined">add</span>
-              </button>
-            </div>
-            <span class="item-subtotal">${{ item.subtotal }}</span>
-          </li>
-          }
-        </ul>
+        <!-- Columna derecha: datos del pedido -->
+        <div class="checkout-panel">
+          <h3 class="checkout-panel-title">2. Entrega y pago</h3>
 
-        <!-- Datos del pedido -->
-        <div class="checkout-form">
-          <div class="checkout-field">
-            <label for="ckSucursal">Sucursal</label>
-            <select id="ckSucursal" class="checkout-input" [ngModel]="sucursalActual()?.id"
+          <div class="form-field">
+            <label for="ckSucursal">Sucursal que prepara tu pedido</label>
+            <select id="ckSucursal" class="form-input" [ngModel]="sucursalActual()?.id"
               (ngModelChange)="sucursalElegida.set($event)">
               @for (s of sucursalesService.sucursales(); track s.id) {
               <option [value]="s.id">{{ $any(s).nombre }}</option>
@@ -199,83 +112,292 @@
             </select>
           </div>
 
-          <div class="checkout-row">
-            <div class="checkout-field">
-              <label for="ckEntrega">Entrega</label>
-              <select id="ckEntrega" class="checkout-input" [ngModel]="metodoEntrega()"
-                (ngModelChange)="metodoEntrega.set($event)">
-                <option value="Sucursal">Recoger en sucursal</option>
-                <option value="Domicilio">A domicilio (+${{ COSTO_ENVIO_DOMICILIO }})</option>
-              </select>
-            </div>
-
-            <div class="checkout-field">
-              <label for="ckPago">Pago</label>
-              <select id="ckPago" class="checkout-input" [ngModel]="metodoPago()"
-                (ngModelChange)="metodoPago.set($event)">
-                <option value="Efectivo en Entrega">Efectivo en entrega</option>
-                <option value="Transferencia SPEI">Transferencia SPEI</option>
-              </select>
+          <div class="form-field">
+            <span class="field-title">¿Cómo lo recibes?</span>
+            <div class="option-cards">
+              <button type="button" class="option-card" [class.selected]="metodoEntrega() === 'Sucursal'"
+                (click)="metodoEntrega.set('Sucursal')">
+                <span class="material-symbols-outlined">storefront</span>
+                <strong>Lo recojo</strong>
+                <small>En la sucursal · sin costo</small>
+              </button>
+              <button type="button" class="option-card" [class.selected]="metodoEntrega() === 'Domicilio'"
+                (click)="metodoEntrega.set('Domicilio')">
+                <span class="material-symbols-outlined">delivery_dining</span>
+                <strong>Me lo llevan</strong>
+                <small>A domicilio · +${{ COSTO_ENVIO_DOMICILIO }}</small>
+              </button>
             </div>
           </div>
 
           @if (metodoEntrega() === 'Domicilio') {
-          <div class="checkout-field">
+          <div class="form-field">
             <label for="ckDireccion">Dirección de entrega *</label>
-            <input id="ckDireccion" type="text" class="checkout-input" placeholder="Calle, número, colonia"
+            <input id="ckDireccion" type="text" class="form-input" placeholder="Calle, número, colonia y referencias"
               [ngModel]="direccionEntrega()" (ngModelChange)="direccionEntrega.set($event)" />
           </div>
           }
 
-          <div class="checkout-field">
+          <div class="form-field">
+            <label for="ckFecha">
+              {{ metodoEntrega() === 'Domicilio' ? 'Fecha y hora de entrega' : 'Fecha y hora en que lo recoges' }}
+            </label>
+            <input id="ckFecha" type="datetime-local" class="form-input" [min]="fechaMinima" [ngModel]="fechaEntrega()"
+              (ngModelChange)="fechaEntrega.set($event)" />
+          </div>
+
+          <div class="form-field">
+            <span class="field-title">Forma de pago</span>
+            <div class="option-cards">
+              <button type="button" class="option-card" [class.selected]="metodoPago() === 'Efectivo en Entrega'"
+                (click)="metodoPago.set('Efectivo en Entrega')">
+                <span class="material-symbols-outlined">payments</span>
+                <strong>Efectivo</strong>
+                <small>{{ metodoEntrega() === 'Domicilio' ? 'Al recibir' : 'Al recoger' }}</small>
+              </button>
+              <button type="button" class="option-card" [class.selected]="metodoPago() === 'Transferencia SPEI'"
+                (click)="metodoPago.set('Transferencia SPEI')">
+                <span class="material-symbols-outlined">account_balance</span>
+                <strong>Transferencia</strong>
+                <small>SPEI</small>
+              </button>
+            </div>
+            @if (metodoPago() === 'Transferencia SPEI') {
+            <p class="field-hint">Los datos para la transferencia te los proporcionará la sucursal.</p>
+            }
+          </div>
+
+          <div class="form-field">
             <label for="ckNotas">Dedicatoria o notas (opcional)</label>
-            <textarea id="ckNotas" rows="2" class="checkout-input"
-              placeholder="Ej. ¡Feliz cumpleaños! / velitas doradas" [ngModel]="notasEspeciales()"
+            <textarea id="ckNotas" rows="2" class="form-input"
+              placeholder="Ej. ¡Feliz cumpleaños, mamá! / velitas doradas" [ngModel]="notasEspeciales()"
               (ngModelChange)="notasEspeciales.set($event)"></textarea>
+          </div>
+
+          <!-- Resumen -->
+          <div class="checkout-summary">
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <strong>${{ subtotalSeleccion() }} MXN</strong>
+            </div>
+            @if (costoEnvio() > 0) {
+            <div class="summary-row">
+              <span>Envío a domicilio</span>
+              <strong>${{ costoEnvio() }} MXN</strong>
+            </div>
+            }
+            <div class="summary-row total">
+              <span>Total a pagar</span>
+              <span class="summary-total">${{ totalSeleccion() }} MXN</span>
+            </div>
+          </div>
+
+          @if (errorPedido()) {
+          <div class="checkout-alert error" role="alert">
+            <span class="material-symbols-outlined">error</span>
+            <span>{{ errorPedido() }}</span>
+          </div>
+          }
+
+          <button type="button" class="btn-confirm-checkout" (click)="confirmarPedido()" [disabled]="enviando()">
+            @if (enviando()) {
+            <span>Registrando tu pedido...</span>
+            } @else {
+            <span class="material-symbols-outlined">check_circle</span>
+            <span>Confirmar pedido</span>
+            }
+          </button>
+        </div>
+      </div>
+    </section>
+    }
+
+    <!-- Filtros de Estado -->
+    <div class="filters-bar">
+      <div class="filter-pills-list">
+        <button type="button" class="filter-pill" [class.active]="filtroEstado() === 'Todos'"
+          (click)="filtroEstado.set('Todos')">
+          Todos ({{ pedidosService.pedidosPorCliente(facturacionService.usuarioActual()?.id,
+          facturacionService.usuarioActual()?.correo).length }})
+        </button>
+        <button type="button" class="filter-pill" [class.active]="filtroEstado() === 'Decorando'"
+          (click)="filtroEstado.set('Decorando')">
+          En Decoración
+        </button>
+        <button type="button" class="filter-pill" [class.active]="filtroEstado() === 'Listo'"
+          (click)="filtroEstado.set('Listo')">
+          Listos para Entrega
+        </button>
+        <button type="button" class="filter-pill" [class.active]="filtroEstado() === 'Entregado'"
+          (click)="filtroEstado.set('Entregado')">
+          Historial Entregados
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista de Pedidos del Cliente -->
+    @if (misPedidos().length > 0) {
+    <div class="pedidos-grid">
+      @for (pedido of misPedidos(); track pedido.id) {
+      <article class="order-card">
+        <div class="order-card-header">
+          <div class="order-id-group">
+            <span class="order-folio">{{ pedido.id }}</span>
+            <span class="order-date">{{ pedido.fechaCreacion | date:'dd/MM/yyyy · hh:mm a' }}</span>
+          </div>
+          <div class="status-badge" [ngClass]="getEstadoClass(pedido.estado)">
+            <span class="material-symbols-outlined icon">{{ getEstadoIcon(pedido.estado) }}</span>
+            <span>{{ pedido.estado }}</span>
           </div>
         </div>
 
-        <div class="modal-total-summary">
-          <div class="summary-line">
+        <!-- Sucursal de retiro / entrega -->
+        <div class="order-branch-banner">
+          <span class="material-symbols-outlined">storefront</span>
+          <span class="branch-text">{{ pedido.sucursalNombre }}</span>
+        </div>
+
+        <!-- Resumen de items -->
+        <div class="order-items-preview">
+          <ul class="items-list">
+            @for (item of pedido.items; track item.nombre) {
+            <li class="item-entry">
+              <span class="item-qty">{{ item.cantidad }}x</span>
+              <span class="item-name">{{ item.nombre }}</span>
+              <span class="item-price">${{ item.importe }}</span>
+            </li>
+            }
+          </ul>
+        </div>
+
+        <!-- Footer con Total y Acciones -->
+        <footer class="order-card-footer">
+          <div class="order-total-box">
+            <span class="total-label">Total a Pagar:</span>
+            <span class="total-val">${{ pedido.total }} <small>MXN</small></span>
+          </div>
+          <button type="button" class="btn-view-detail" (click)="verDetalle(pedido)">
+            <span class="material-symbols-outlined">visibility</span>
+            <span>Ver Detalle</span>
+          </button>
+        </footer>
+      </article>
+      }
+    </div>
+    } @else {
+    <!-- Estado Vacío -->
+    <div class="empty-orders-card">
+      <div class="empty-icon-wrap">
+        <span class="material-symbols-outlined">shopping_basket</span>
+      </div>
+      <h3>No tienes pedidos con el filtro seleccionado</h3>
+      <p>¿Antojo de un pastel de autor o pan dulce tradicional recién horneado? Explora nuestro catálogo artesanal.</p>
+      <a routerLink="/catalogo" class="btn-empty-shop">
+        <span class="material-symbols-outlined">menu_book</span>
+        <span>Explorar Catálogo</span>
+      </a>
+    </div>
+    }
+  </div>
+
+  <!-- MODAL DE DETALLE DE PEDIDO -->
+  @if (pedidoDetalle()) {
+  <div class="modal-overlay" (click)="cerrarDetalle()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div>
+          <span class="modal-tag">Detalle de Pedido</span>
+          <h3 class="modal-title">{{ pedidoDetalle()?.id }}</h3>
+        </div>
+        <button type="button" class="btn-close-modal" (click)="cerrarDetalle()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </header>
+
+      <div class="modal-body">
+        <div class="detail-status-banner" [ngClass]="getEstadoClass(pedidoDetalle()!.estado)">
+          <span class="material-symbols-outlined">{{ getEstadoIcon(pedidoDetalle()!.estado) }}</span>
+          <div>
+            <strong>Estado Actual: {{ pedidoDetalle()?.estado }}</strong>
+            <p>Entrega estimada: {{ pedidoDetalle()?.fechaEntregaEstimada | date:'dd/MM/yyyy · hh:mm a' }}</p>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Punto de Entrega</h4>
+          <div class="info-box">
+            <p><strong>Sucursal:</strong> {{ pedidoDetalle()?.sucursalNombre }}</p>
+            <p><strong>Modalidad:</strong> {{ pedidoDetalle()?.metodoEntrega }}</p>
+            <p><strong>Pago:</strong> {{ pedidoDetalle()?.metodoPago }}</p>
+            @if (pedidoDetalle()?.direccionEntrega) {
+            <p><strong>Dirección:</strong> {{ pedidoDetalle()?.direccionEntrega }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Productos</h4>
+          <div class="detail-table-wrap">
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th>Cant.</th>
+                  <th>Producto</th>
+                  <th>P. Unitario</th>
+                  <th>Importe</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (it of pedidoDetalle()?.items; track it.nombre) {
+                <tr>
+                  <td><strong>{{ it.cantidad }}</strong></td>
+                  <td>
+                    <div>{{ it.nombre }}</div>
+                    @if (it.notas) {
+                    <small class="item-note">Nota: {{ it.notas }}</small>
+                    }
+                  </td>
+                  <td>${{ it.precioUnitario }}</td>
+                  <td><strong>${{ it.importe }}</strong></td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        @if (pedidoDetalle()?.notasEspeciales) {
+        <div class="detail-section">
+          <h4>Dedicatoria / Notas Especiales</h4>
+          <div class="note-box">
+            <span class="material-symbols-outlined">edit_note</span>
+            <span>{{ pedidoDetalle()?.notasEspeciales }}</span>
+          </div>
+        </div>
+        }
+
+        <div class="detail-totals">
+          <div class="total-line">
             <span>Subtotal:</span>
-            <strong>${{ catalogoService.totalMontoSeleccionado() }} MXN</strong>
+            <span>${{ pedidoDetalle()?.subtotal }}</span>
           </div>
-          @if (costoEnvio() > 0) {
-          <div class="summary-line">
-            <span>Envío a domicilio:</span>
-            <strong>${{ costoEnvio() }} MXN</strong>
+          <div class="total-line">
+            <span>Envío:</span>
+            <span>${{ pedidoDetalle()?.costoEnvio }}</span>
           </div>
-          }
-          <div class="summary-line highlight">
-            <span>Total a pagar:</span>
-            <span class="grand-total">${{ totalConEnvio() }} MXN</span>
+          <div class="total-line grand">
+            <span>Total:</span>
+            <span class="price-big">${{ pedidoDetalle()?.total }} MXN</span>
           </div>
         </div>
       </div>
 
       <footer class="modal-footer">
-        <button type="button" class="btn-clear-selection" (click)="vaciarSeleccion()" [disabled]="enviando()">
-          <span class="material-symbols-outlined">delete_outline</span>
-          <span>Vaciar selección</span>
-        </button>
-        <button type="button" class="btn-confirm-order" (click)="confirmarPedido()" [disabled]="enviando()">
-          @if (enviando()) {
-          <span>Registrando pedido...</span>
-          } @else {
-          <span>Confirmar pedido</span>
-          <span class="material-symbols-outlined">check_circle</span>
-          }
+        <button type="button" class="btn-modal-close" (click)="cerrarDetalle()">
+          <span>Cerrar</span>
         </button>
       </footer>
     </div>
-  </div>
-  }
-
-  <!-- Notificación Toast -->
-  @if (mensajeToast()) {
-  <div class="toast-notification">
-    <span class="material-symbols-outlined icon">task_alt</span>
-    <span>{{ mensajeToast() }}</span>
   </div>
   }
 </div>

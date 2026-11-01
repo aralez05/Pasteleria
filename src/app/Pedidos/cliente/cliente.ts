@@ -1,10 +1,10 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { CatalogoService, Producto } from '../../Catalogo/catalogo.service';
+import { RouterLink } from '@angular/router';
 import { PedidosService, Pedido, PedidoItem } from '../pedidos.service';
 import { FacturacionService } from '../../Facturacion/facturacion.service';
+import { CatalogoService, Producto } from '../../Catalogo/catalogo.service'; // ajusta la ruta si tu carpeta se llama distinto
 import { SucursalesService } from '../../Sucursales/sucursales.service';
 
 @Component({
@@ -15,67 +15,37 @@ import { SucursalesService } from '../../Sucursales/sucursales.service';
   styleUrl: './cliente.css',
 })
 export class Clientes {
-  protected readonly catalogoService = inject(CatalogoService);
-  protected readonly pedidosService = inject(PedidosService);
-  protected readonly facturacionService = inject(FacturacionService);
-  protected readonly sucursalesService = inject(SucursalesService);
-  private readonly router = inject(Router);
+  public pedidosService = inject(PedidosService);
+  public facturacionService = inject(FacturacionService);
+  public catalogoService = inject(CatalogoService);
+  public sucursalesService = inject(SucursalesService);
 
-  /** Costo fijo de envío a domicilio (cámbialo a tu tarifa real) */
+  /** Costo fijo de envío a domicilio (pon aquí tu tarifa real) */
   readonly COSTO_ENVIO_DOMICILIO = 45;
 
-  /** Término de búsqueda */
-  readonly busqueda = signal('');
+  // Filtro de estado
+  readonly filtroEstado = signal<string>('Todos');
 
-  /** Categoría seleccionada para filtrar */
-  readonly categoriaFiltro = signal('Todos');
+  // Modal para detalle de pedido
+  readonly pedidoDetalle = signal<Pedido | null>(null);
 
-  /** Modal para ver el resumen de los productos seleccionados */
-  readonly modalResumenAbierto = signal(false);
+  // =========================================================================
+  // FINALIZAR PEDIDO (productos que se eligieron en el catálogo)
+  // =========================================================================
 
-  /** Mensaje de confirmación toast */
-  readonly mensajeToast = signal<string | null>(null);
-
-  // ----- Datos del pedido (se llenan en el modal) -----
   readonly sucursalElegida = signal('');
   readonly metodoEntrega = signal<'Sucursal' | 'Domicilio'>('Sucursal');
   readonly direccionEntrega = signal('');
   readonly metodoPago = signal<Pedido['metodoPago']>('Efectivo en Entrega');
   readonly notasEspeciales = signal('');
+  readonly fechaEntrega = signal(this.formatoFechaLocal(24 * 60 * 60 * 1000)); // por defecto: mañana a esta hora
+  readonly fechaMinima = this.formatoFechaLocal(0);
+
   readonly enviando = signal(false);
+  readonly errorPedido = signal<string | null>(null);
+  readonly exitoPedido = signal<string | null>(null);
 
-  /** Sucursal elegida (si no eligió ninguna, la primera de la lista) */
-  readonly sucursalActual = computed(() => {
-    const lista = this.sucursalesService.sucursales();
-    return lista.find((s) => s.id === this.sucursalElegida()) ?? lista[0];
-  });
-
-  readonly costoEnvio = computed(() =>
-    this.metodoEntrega() === 'Domicilio' ? this.COSTO_ENVIO_DOMICILIO : 0
-  );
-
-  readonly totalConEnvio = computed(
-    () => Math.round((this.catalogoService.totalMontoSeleccionado() + this.costoEnvio()) * 100) / 100
-  );
-
-  /** Lista de productos filtrados */
-  readonly productosFiltrados = computed(() => {
-    const termino = this.busqueda().trim().toLowerCase();
-    const cat = this.categoriaFiltro();
-    const todos = this.catalogoService.productos();
-
-    return todos.filter((p) => {
-      const coincideCat = cat === 'Todos' || p.categoria === cat;
-      const coincideTermino =
-        !termino ||
-        p.nombre.toLowerCase().includes(termino) ||
-        p.sabor.toLowerCase().includes(termino) ||
-        p.descripcion.toLowerCase().includes(termino);
-      return coincideCat && coincideTermino;
-    });
-  });
-
-  /** Productos seleccionados actualmente */
+  /** Productos que el cliente eligió en el catálogo */
   readonly productosEnSeleccion = computed(() => {
     const mapa = this.catalogoService.seleccion();
     const resultado: { producto: Producto; cantidad: number; subtotal: number }[] = [];
@@ -83,21 +53,26 @@ export class Clientes {
     for (const prod of this.catalogoService.productos()) {
       const cant = mapa.get(prod.id) || 0;
       if (cant > 0) {
-        resultado.push({
-          producto: prod,
-          cantidad: cant,
-          subtotal: prod.precio * cant,
-        });
+        resultado.push({ producto: prod, cantidad: cant, subtotal: prod.precio * cant });
       }
     }
     return resultado;
   });
 
-  seleccionarProducto(producto: Producto): void {
-    if (producto.stock <= 0) return;
-    this.catalogoService.incrementarSeleccion(producto.id);
-    this.mostrarToast(`¡Agregaste 1 "${producto.nombre}" a tu selección!`);
-  }
+  readonly sucursalActual = computed(() => {
+    const lista = this.sucursalesService.sucursales();
+    return lista.find((s) => s.id === this.sucursalElegida()) ?? lista[0];
+  });
+
+  readonly subtotalSeleccion = computed(() => this.catalogoService.totalMontoSeleccionado());
+
+  readonly costoEnvio = computed(() =>
+    this.metodoEntrega() === 'Domicilio' ? this.COSTO_ENVIO_DOMICILIO : 0
+  );
+
+  readonly totalSeleccion = computed(
+    () => Math.round((this.subtotalSeleccion() + this.costoEnvio()) * 100) / 100
+  );
 
   incrementar(id: string): void {
     this.catalogoService.incrementarSeleccion(id);
@@ -107,46 +82,26 @@ export class Clientes {
     this.catalogoService.decrementarSeleccion(id);
   }
 
-  obtenerCantidad(id: string): number {
-    return this.catalogoService.getCantidadSeleccionada(id);
-  }
-
-  abrirResumen(): void {
-    if (this.catalogoService.totalPiezasSeleccionadas() > 0) {
-      this.modalResumenAbierto.set(true);
-    }
-  }
-
-  cerrarResumen(): void {
-    this.modalResumenAbierto.set(false);
+  quitarProducto(id: string): void {
+    this.catalogoService.setCantidadSeleccionada(id, 0);
   }
 
   vaciarSeleccion(): void {
     this.catalogoService.limpiarSeleccion();
-    this.cerrarResumen();
-    this.mostrarToast('Se ha vaciado tu selección');
   }
 
-  // =========================================================================
-  // CONFIRMAR PEDIDO → se guarda en MySQL (tablas pedidos y lista_productos)
-  // =========================================================================
+  cerrarExito(): void {
+    this.exitoPedido.set(null);
+  }
+
+  /** Valida los datos y guarda el pedido en la base de datos */
   confirmarPedido(): void {
     if (this.enviando()) return;
+    this.errorPedido.set(null);
 
     const usuario: any = this.facturacionService.usuarioActual();
     if (!usuario) {
-      this.mostrarToast('⚠ Inicia sesión para hacer tu pedido.');
-      return;
-    }
-
-    const sucursal = this.sucursalActual();
-    if (!sucursal) {
-      this.mostrarToast('⚠ Elige una sucursal.');
-      return;
-    }
-
-    if (this.metodoEntrega() === 'Domicilio' && !this.direccionEntrega().trim()) {
-      this.mostrarToast('⚠ Escribe la dirección de entrega.');
+      this.errorPedido.set('Inicia sesión para hacer tu pedido.');
       return;
     }
 
@@ -157,8 +112,28 @@ export class Clientes {
       precioUnitario: i.producto.precio,
       importe: i.subtotal,
     }));
+    if (items.length === 0) {
+      this.errorPedido.set('Tu selección está vacía. Elige productos en el catálogo.');
+      return;
+    }
 
-    if (items.length === 0) return;
+    const sucursal = this.sucursalActual();
+    if (!sucursal) {
+      this.errorPedido.set('Elige la sucursal que preparará tu pedido.');
+      return;
+    }
+
+    const esDomicilio = this.metodoEntrega() === 'Domicilio';
+    if (esDomicilio && this.direccionEntrega().trim().length < 8) {
+      this.errorPedido.set('Escribe la dirección completa de entrega (calle, número y colonia).');
+      return;
+    }
+
+    const fecha = new Date(this.fechaEntrega());
+    if (isNaN(fecha.getTime()) || fecha.getTime() <= Date.now()) {
+      this.errorPedido.set('Elige una fecha y hora de entrega que sea posterior a este momento.');
+      return;
+    }
 
     this.enviando.set(true);
 
@@ -170,13 +145,13 @@ export class Clientes {
         clienteEmail: usuario.correo || '',
         sucursalId: sucursal.id,
         sucursalNombre: (sucursal as any).nombre,
-        fechaEntregaEstimada: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        fechaEntregaEstimada: fecha.toISOString(),
         items,
-        subtotal: this.catalogoService.totalMontoSeleccionado(),
+        subtotal: this.subtotalSeleccion(),
         costoEnvio: this.costoEnvio(),
-        total: this.totalConEnvio(),
+        total: this.totalSeleccion(),
         metodoEntrega: this.metodoEntrega(),
-        direccionEntrega: this.metodoEntrega() === 'Domicilio' ? this.direccionEntrega().trim() : undefined,
+        direccionEntrega: esDomicilio ? this.direccionEntrega().trim() : undefined,
         metodoPago: this.metodoPago(),
         estado: 'Pendiente',
         notasEspeciales: this.notasEspeciales().trim() || undefined,
@@ -185,24 +160,85 @@ export class Clientes {
         next: (pedido) => {
           this.enviando.set(false);
           this.catalogoService.limpiarSeleccion();
-          this.catalogoService.cargarProductos(); // refresca el stock
-          this.notasEspeciales.set('');
+          this.catalogoService.cargarProductos(); // refresca el stock del catálogo
           this.direccionEntrega.set('');
-          this.cerrarResumen();
-          this.mostrarToast(`✓ ¡Pedido ${pedido.id} registrado!`);
-          this.router.navigate(['/mis-pedidos']);
+          this.notasEspeciales.set('');
+          this.metodoEntrega.set('Sucursal');
+          this.filtroEstado.set('Todos');
+          this.exitoPedido.set(`¡Listo! Tu pedido ${pedido.id} quedó registrado y ya lo estamos preparando.`);
         },
         error: (err) => {
           this.enviando.set(false);
-          this.mostrarToast(`⚠ No se pudo registrar el pedido: ${this.catalogoService.mensajeDeError(err)}`);
+          this.errorPedido.set(this.catalogoService.mensajeDeError(err));
         },
       });
   }
 
-  private mostrarToast(mensaje: string): void {
-    this.mensajeToast.set(mensaje);
-    setTimeout(() => {
-      this.mensajeToast.set(null);
-    }, 3200);
+  /** Fecha en el formato que usa <input type="datetime-local"> (hora local) */
+  private formatoFechaLocal(desplazamientoMs: number): string {
+    const d = new Date(Date.now() + desplazamientoMs);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  }
+
+  // =========================================================================
+  // SEGUIMIENTO DE MIS PEDIDOS
+  // =========================================================================
+
+  // Pedidos del cliente actual
+  readonly misPedidos = computed(() => {
+    const usuario = this.facturacionService.usuarioActual();
+    const lista = this.pedidosService.pedidosPorCliente(usuario?.id, usuario?.correo);
+    const estado = this.filtroEstado();
+
+    if (estado === 'Todos') return lista;
+    return lista.filter(p => p.estado === estado);
+  });
+
+  // Métricas del cliente
+  readonly pedidosActivosCount = computed(() => {
+    const usuario = this.facturacionService.usuarioActual();
+    return this.pedidosService
+      .pedidosPorCliente(usuario?.id, usuario?.correo)
+      .filter(p => ['Pendiente', 'En Horno', 'Decorando', 'Listo'].includes(p.estado)).length;
+  });
+
+  readonly pedidosEntregadosCount = computed(() => {
+    const usuario = this.facturacionService.usuarioActual();
+    return this.pedidosService
+      .pedidosPorCliente(usuario?.id, usuario?.correo)
+      .filter(p => p.estado === 'Entregado').length;
+  });
+
+  verDetalle(pedido: Pedido): void {
+    this.pedidoDetalle.set(pedido);
+  }
+
+  cerrarDetalle(): void {
+    this.pedidoDetalle.set(null);
+  }
+
+  getEstadoClass(estado: string): string {
+    switch (estado) {
+      case 'Pendiente': return 'status-pendiente';
+      case 'En Horno': return 'status-horno';
+      case 'Decorando': return 'status-decorando';
+      case 'Listo': return 'status-listo';
+      case 'Entregado': return 'status-entregado';
+      case 'Cancelado': return 'status-cancelado';
+      default: return '';
+    }
+  }
+
+  getEstadoIcon(estado: string): string {
+    switch (estado) {
+      case 'Pendiente': return 'schedule';
+      case 'En Horno': return 'local_fire_department';
+      case 'Decorando': return 'palette';
+      case 'Listo': return 'check_circle';
+      case 'Entregado': return 'task_alt';
+      case 'Cancelado': return 'cancel';
+      default: return 'help';
+    }
   }
 }

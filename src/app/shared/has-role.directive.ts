@@ -1,34 +1,42 @@
-import { Directive, Input, TemplateRef, ViewContainerRef, inject, effect } from '@angular/core';
+import { Directive, Input, TemplateRef, ViewContainerRef, effect, inject, signal } from '@angular/core';
 import { FacturacionService } from '../Facturacion/facturacion.service';
 
+/**
+ * Muestra el contenido solo si el rol del usuario está en la lista.
+ * Si no hay sesión iniciada, el rol es 'visitante'.
+ *
+ * Ejemplos:
+ *   <div *hasRole="'admin'">...</div>
+ *   <div *hasRole="['cliente', 'visitante']">...</div>
+ */
 @Directive({
     selector: '[hasRole]',
-    standalone: true
+    standalone: true,
 })
 export class HasRoleDirective {
-    private templateRef = inject(TemplateRef<any>);
-    private viewContainer = inject(ViewContainerRef);
-    private facturacionService = inject(FacturacionService);
+    private readonly plantilla = inject(TemplateRef<unknown>);
+    private readonly contenedor = inject(ViewContainerRef);
+    private readonly facturacionService = inject(FacturacionService);
 
-    private allowedRoles: string[] = [];
+    private readonly rolesPermitidos = signal<string[]>([]);
+    private visible = false;
 
-    @Input() set hasRole(roles: string | string[]) {
-        this.allowedRoles = Array.isArray(roles) ? roles : [roles];
-        this.updateView();
+    @Input() set hasRole(valor: string | string[]) {
+        this.rolesPermitidos.set(Array.isArray(valor) ? valor : [valor]);
     }
 
     constructor() {
         effect(() => {
-            this.updateView();
+            const rol = this.facturacionService.usuarioActual()?.rol ?? 'visitante';
+            const permitido = this.rolesPermitidos().includes(rol);
+
+            if (permitido && !this.visible) {
+                this.contenedor.createEmbeddedView(this.plantilla);
+                this.visible = true;
+            } else if (!permitido && this.visible) {
+                this.contenedor.clear();
+                this.visible = false;
+            }
         });
-    }
-
-    private updateView(): void {
-        const currentRole = this.facturacionService.rolUsuario();
-        this.viewContainer.clear();
-
-        if (currentRole && this.allowedRoles.includes(currentRole)) {
-            this.viewContainer.createEmbeddedView(this.templateRef);
-        }
     }
 }
