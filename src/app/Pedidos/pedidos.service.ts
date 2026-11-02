@@ -41,7 +41,7 @@ export class PedidosService {
   private http = inject(HttpClient);
   private facturacionService = inject(FacturacionService);
 
-  private readonly API_URL = 'http://localhost:3000/api/pedidos';
+  private readonly API_URL = 'https://bakcend-5pyr.onrender.com/api/pedidos';
 
   /** Pedidos cargados desde MySQL (según el rol del usuario conectado) */
   readonly pedidos = signal<Pedido[]>([]);
